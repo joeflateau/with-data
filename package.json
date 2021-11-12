@@ -7,6 +7,11 @@
     "dist",
     "src"
   ],
+  "keywords": [
+    "react",
+    "data-item",
+    "events"
+  ],
   "engines": {
     "node": ">=10"
   },

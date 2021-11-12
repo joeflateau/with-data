@@ -1,6 +1,6 @@
 # with-data
 
-A higher order component for associating data items with components for use in event handlers for high performance user interfaces.
+A React higher order component for associating data items with components for use in event handlers for high performance user interfaces.
 
 ## Install
 
