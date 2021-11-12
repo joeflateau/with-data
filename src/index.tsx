@@ -1,5 +1,5 @@
-import React, { useMemo, useRef } from 'react';
-import { useShallowMemo } from './useShallowMemo';
+import React, { useMemo, useRef } from "react";
+import { useShallowMemo } from "./useShallowMemo";
 
 export function withDataItem<
   TProps,
@@ -9,10 +9,10 @@ export function withDataItem<
     TNativeEventHandlers,
     TPickedNativeHandlerKeys[number]
   >,
-  TPickedNativeHandlerKey extends keyof TPickedNativeHandlers
+  TPickedNativeHandlerKey extends keyof TPickedNativeHandlers,
 >(
   Target: React.ComponentType<TProps>,
-  nativeHandlerKeys: TPickedNativeHandlerKeys
+  nativeHandlerKeys: TPickedNativeHandlerKeys,
 ) {
   return function DataComponent<
     TItem,
@@ -22,11 +22,11 @@ export function withDataItem<
         TPickedNativeHandlers[TPickedNativeHandlerKey]
       >,
       TItem
-    >
+    >,
   >(
     props: { dataItem: TItem } & TProps &
       TNativeEventHandlers &
-      TDataItemEventHandlers
+      TDataItemEventHandlers,
   ) {
     const itemRef = useRef(props.dataItem);
     itemRef.current = props.dataItem;
@@ -40,7 +40,7 @@ export function withDataItem<
         const dataItemHandlerKey =
           `${key}DataItem` as keyof TDataItemEventHandlers;
         const dataItemHandler = props[dataItemHandlerKey];
-        if (typeof dataItemHandler === 'function') {
+        if (typeof dataItemHandler === "function") {
           const nativeHandler = () => dataItemHandler(itemRef.current);
           // TODO: shouldn't need an any cast here
           newProps[key] = nativeHandler as any;

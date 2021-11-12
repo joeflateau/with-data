@@ -1,19 +1,19 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { withDataItem } from '../src';
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+import { withDataItem } from "../src";
 
 const Button = (props: { onClick?: () => void; children: React.ReactNode }) => {
   return <button onClick={props.onClick}>{props.children}</button>;
 };
 
-describe('Thing', () => {
-  it('renders without crashing', () => {
+describe("Thing", () => {
+  it("renders without crashing", () => {
     const DataItemButton = withDataItem(
       Button, // <---------- A component to wrap
-      ['onClick'] // <------ which event handlers should be wrapped
+      ["onClick"], // <------ which event handlers should be wrapped
     );
 
-    const people = ['Derek', 'Jim', 'Joe', 'Mike'];
+    const people = ["Derek", "Jim", "Joe", "Mike"];
 
     const sayName = (name: string) => alert(`Hello, ${name}`);
 
@@ -31,7 +31,7 @@ describe('Thing', () => {
         </div>
       );
     };
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     ReactDOM.render(<App />, div);
     ReactDOM.unmountComponentAtNode(div);
   });

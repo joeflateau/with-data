@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 export function useShallowMemo<T extends Record<string, any>>(object: T) {
   return useMemo(() => {
