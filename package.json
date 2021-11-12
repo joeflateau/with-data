@@ -16,6 +16,7 @@
   "engines": {
     "node": ">=10"
   },
+  "repository": "joeflateau/with-data",
   "scripts": {
     "start": "dts watch",
     "build": "dts build",
