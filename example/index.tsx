@@ -1,17 +1,20 @@
-import * as React from 'react';
-import 'react-app-polyfill/ie11';
-import { Button } from 'react-bootstrap';
-import * as ReactDOM from 'react-dom';
-import { withDataItem } from '../.';
+import * as React from "react";
+import "react-app-polyfill/ie11";
+import { Button } from "react-bootstrap";
+import * as ReactDOM from "react-dom";
+import { withDataItem } from "../.";
 
 const DataItemButton = withDataItem(
   Button, // <---------- A component to wrap
-  ['onClick'] // <------ which event handlers should be wrapped
+  ["onClick"], // <------ which event handlers should be wrapped
 );
 
-const people = ['Derek', 'Jim', 'Joe', 'Mike'];
+const people = ["Derek", "Jim", "Joe", "Mike"];
 
-const sayName = (name: string) => alert(`Hello, ${name}`);
+const sayName = (name: string, ev: MouseEvent) => {
+  ev.stopPropagation();
+  return alert(`Hello, ${name}`);
+};
 
 const App = () => {
   return (
@@ -28,4 +31,4 @@ const App = () => {
   );
 };
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementById("root"));

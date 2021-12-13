@@ -17,10 +17,9 @@ export function withDataItem<
   return function DataComponent<
     TItem,
     TDataItemEventHandlers extends DataItemHandlerMap<
-      Record<
-        TPickedNativeHandlerKey,
-        TPickedNativeHandlers[TPickedNativeHandlerKey]
-      >,
+      {
+        [key in TPickedNativeHandlerKey]: TPickedNativeHandlers[TPickedNativeHandlerKey];
+      },
       TItem
     >,
   >(
@@ -44,6 +43,8 @@ export function withDataItem<
           const nativeHandler = () => dataItemHandler(itemRef.current);
           // TODO: shouldn't need an any cast here
           newProps[key] = nativeHandler as any;
+        } else {
+          delete newProps[key];
         }
       });
 
@@ -59,8 +60,14 @@ export function withDataItem<
   };
 }
 
-type DataItemHandlerMap<TProps, TItem> = {
-  [TKey in keyof TProps as `${string & TKey}DataItem`]: DataItemHandler<TItem>;
+type DataItemHandlerMap<
+  TProps extends Record<string | symbol, NativeHandler>,
+  TItem,
+> = {
+  [TKey in keyof TProps as `${string & TKey}DataItem`]: DataItemHandler<
+    TItem,
+    TProps[TKey]
+  >;
 };
 
 type KeyList<T> = (keyof T)[];
@@ -76,4 +83,7 @@ type PickPropertiesOfType<TProps, TPropertyType> = {
 
 type NativeHandler = (...args: any[]) => any;
 
-type DataItemHandler<TItem> = (dataItem: TItem) => void;
+type DataItemHandler<TItem, TNativeHandler extends NativeHandler> = (
+  dataItem: TItem,
+  ...nativeArgs: Parameters<TNativeHandler>
+) => void;
