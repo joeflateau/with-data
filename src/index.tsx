@@ -22,10 +22,11 @@ export function withDataItem<
       },
       TDataItem
     >,
-    THigherProps extends { dataItem: TDataItem } & TLowerProps &
+  >(
+    higherProps: { dataItem: TDataItem } & TLowerProps &
       TLowerEventHandlers &
       THigherEventHandlers,
-  >(higherProps: THigherProps) {
+  ) {
     const itemRef = useRef(higherProps.dataItem);
     itemRef.current = higherProps.dataItem;
 
@@ -34,7 +35,7 @@ export function withDataItem<
     const lowerProps = useMemo(() => {
       const lowerProps = {} as TLowerProps & TLowerEventHandlers;
 
-      const bannedKeys = new Set<keyof THigherProps>(["dataItem"]);
+      const bannedKeys = new Set<keyof typeof higherProps>(["dataItem"]);
 
       lowerHandlerKeys.forEach((key) => {
         const dataItemHandlerKey =
