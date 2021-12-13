@@ -40,7 +40,8 @@ export function withDataItem<
           `${key}DataItem` as keyof TDataItemEventHandlers;
         const dataItemHandler = props[dataItemHandlerKey];
         if (typeof dataItemHandler === "function") {
-          const nativeHandler = () => dataItemHandler(itemRef.current);
+          const nativeHandler = (...args: any[]) =>
+            dataItemHandler(itemRef.current, ...args);
           // TODO: shouldn't need an any cast here
           newProps[key] = nativeHandler as any;
         } else {
