@@ -2,67 +2,76 @@ import React, { useMemo, useRef } from "react";
 import { useShallowMemo } from "./useShallowMemo";
 
 export function withDataItem<
-  TProps,
-  TNativeEventHandlers extends PickPropertiesOfType<TProps, NativeHandler>,
-  TPickedNativeHandlerKeys extends KeyList<TNativeEventHandlers>,
-  TPickedNativeHandlers extends Pick<
-    TNativeEventHandlers,
-    TPickedNativeHandlerKeys[number]
+  TLowerProps,
+  TLowerEventHandlers extends PickPropertiesOfType<TLowerProps, LowerHandler>,
+  TPickedLowerHandlerKeys extends KeyList<TLowerEventHandlers>,
+  TPickedLowerHandlers extends Pick<
+    TLowerEventHandlers,
+    TPickedLowerHandlerKeys[number]
   >,
-  TPickedNativeHandlerKey extends keyof TPickedNativeHandlers,
+  TPickedLowerHandlerKey extends keyof TPickedLowerHandlers,
 >(
-  Target: React.ComponentType<TProps>,
-  nativeHandlerKeys: TPickedNativeHandlerKeys,
+  Target: React.ComponentType<TLowerProps>,
+  lowerHandlerKeys: TPickedLowerHandlerKeys,
 ) {
   return function DataComponent<
-    TItem,
-    TDataItemEventHandlers extends DataItemHandlerMap<
+    TDataItem,
+    THigherEventHandlers extends DataItemHandlerMap<
       {
-        [key in TPickedNativeHandlerKey]: TPickedNativeHandlers[TPickedNativeHandlerKey];
+        [key in TPickedLowerHandlerKey]: TPickedLowerHandlers[TPickedLowerHandlerKey];
       },
-      TItem
+      TDataItem
     >,
-  >(
-    props: { dataItem: TItem } & TProps &
-      TNativeEventHandlers &
-      TDataItemEventHandlers,
-  ) {
-    const itemRef = useRef(props.dataItem);
-    itemRef.current = props.dataItem;
+    THigherProps extends { dataItem: TDataItem } & TLowerProps &
+      TLowerEventHandlers &
+      THigherEventHandlers,
+  >(higherProps: THigherProps) {
+    const itemRef = useRef(higherProps.dataItem);
+    itemRef.current = higherProps.dataItem;
 
-    props = useShallowMemo(props);
+    higherProps = useShallowMemo(higherProps);
 
-    const handledProps = useMemo(() => {
-      const newProps = {} as TNativeEventHandlers;
+    const lowerProps = useMemo(() => {
+      const lowerProps = {} as TLowerProps & TLowerEventHandlers;
 
-      nativeHandlerKeys.forEach((key) => {
+      const bannedKeys = new Set<keyof THigherProps>(["dataItem"]);
+
+      lowerHandlerKeys.forEach((key) => {
         const dataItemHandlerKey =
-          `${key}DataItem` as keyof TDataItemEventHandlers;
-        const dataItemHandler = props[dataItemHandlerKey];
+          `${key}DataItem` as keyof THigherEventHandlers;
+
+        bannedKeys.add(dataItemHandlerKey);
+
+        const dataItemHandler = higherProps[dataItemHandlerKey];
+
         if (typeof dataItemHandler === "function") {
-          const nativeHandler = (...args: any[]) =>
+          const lowerHandler = (...args: any[]) =>
             dataItemHandler(itemRef.current, ...args);
           // TODO: shouldn't need an any cast here
-          newProps[key] = nativeHandler as any;
-        } else {
-          delete newProps[key];
+          lowerProps[key] = lowerHandler as any;
         }
       });
 
-      return newProps;
-    }, [props]);
+      entries(higherProps)
+        .filter(([key]) => !bannedKeys.has(key))
+        .forEach(([key, value]) => {
+          // TODO: shouldn't need an any cast here
+          (lowerProps as any)[key] = value;
+        });
 
-    const combinedProps = {
-      ...props,
-      ...handledProps,
-    };
+      return lowerProps;
+    }, [higherProps]);
 
-    return <Target {...combinedProps} />;
+    return <Target {...lowerProps} />;
   };
 }
 
+function entries<T, K extends keyof T>(value: T): [key: K, value: T[K]][] {
+  return Object.entries(value) as [key: K, value: T[K]][];
+}
+
 type DataItemHandlerMap<
-  TProps extends Record<string | symbol, NativeHandler>,
+  TProps extends Record<string | symbol, LowerHandler>,
   TItem,
 > = {
   [TKey in keyof TProps as `${string & TKey}DataItem`]: DataItemHandler<
@@ -82,9 +91,9 @@ type PickPropertiesOfType<TProps, TPropertyType> = {
     : never]: TPropertyType;
 };
 
-type NativeHandler = (...args: any[]) => any;
+type LowerHandler = (...args: any[]) => any;
 
-type DataItemHandler<TItem, TNativeHandler extends NativeHandler> = (
+type DataItemHandler<TItem, TLowerHandler extends LowerHandler> = (
   dataItem: TItem,
-  ...nativeArgs: Parameters<TNativeHandler>
+  ...lowerArgs: Parameters<TLowerHandler>
 ) => void;
